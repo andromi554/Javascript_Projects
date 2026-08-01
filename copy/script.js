@@ -1,29 +1,57 @@
-const form = document.getElementById("contact-form");
-const successState = document.getElementById("success");
-const resetBtn = document.getElementById("reset-btn");
+const steps = document.querySelectorAll(".step");
+const formSteps = document.querySelectorAll(".form-step");
+const progressBar = document.getElementById("progressBar");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault(); // this will prevent reloandrominading the page
+let currentStep = 1;
+const totalSteps = steps.length;
 
-  const submitBtn = form.querySelector(".submit-btn");
+function updateProgress() {
+  const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  progressBar.style.width = `${progress}%`;
 
-  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-  submitBtn.disabled = true;
+  // update step indicators
+  steps.forEach((step, index) => {
+    const stepNum = index + 1;
+    step.classList.remove("active", "completed");
 
-  // simulate api call
-  setTimeout(() => {
-    form.classList.add("hidden");
-    successState.classList.remove("hidden");
-  }, 2000);
-});
+    if (stepNum < currentStep) {
+      step.classList.add("completed");
+    } else if (stepNum === currentStep) {
+      step.classList.add("active");
+    }
+  });
 
-resetBtn.addEventListener("click", () => {
-  form.reset();
-  form.classList.remove("hidden");
-  successState.classList.add("hidden");
+  // update form steps
+  formSteps.forEach((step, index) => {
+    step.classList.remove("active");
+    if (currentStep === index + 1) {
+      step.classList.add("active");
+    }
+  });
 
-  const submitBtn = form.querySelector(".submit-btn");
+  prevBtn.disabled = currentStep === 1;
+  nextBtn.textContent = currentStep === totalSteps ? "Submit" : "Next";
+}
 
-  submitBtn.innerHTML = '<span>Send Message</span><i class="fa-solid fa-paper-plane"></i>';
-  submitBtn.disabled = false;
-});
+function prevStep() {
+  if (currentStep > 1) {
+    currentStep--;
+    updateProgress();
+  }
+}
+
+function nextStep() {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateProgress();
+  } else {
+    alert("Form submitted successfully! 🎉");
+    currentStep = 1;
+    updateProgress();
+  }
+}
+
+prevBtn.addEventListener("click", prevStep);
+nextBtn.addEventListener("click", nextStep);
